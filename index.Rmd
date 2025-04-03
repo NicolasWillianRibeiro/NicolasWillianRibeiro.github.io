@@ -1,19 +1,15 @@
 ---
-title: "Tobi Burns"
-image: "tobi.jpg"
+title: "Nicolas Willian Ribeiro"
+image: "EU.jpg"
 links:
   - label: LinkedIn
-    url: "https://linkedin.com/"
-  - label: Twitter
-    url: "https://twitter.com/"
+    url: "https://www.linkedin.com/in/nicolas-willian-garcia-santos-ribeiro-305256204/"
   - label: GitHub
-    url: "https://github.com/"
+    url: "https://NicolasWillianRibeiro.github.io"
   - label: Email
-    url: "mailto:email@email.com"
+    url: "nickwillian@gmail.com"
 output:
   postcards::jolla
 ---
  
-I am a classically trained data scientist living in the San Francisco Bay Area. 
-Currently I work on the Oculus team at Facebook. I love talking about baseball, 
-true crime podcasts, and causal inference.
+Tenho 25 anos,sou um analista de suporte na ASI Soluções tecnologicas e um graduando em Engenharia de Telecomunicações na UFSJ.
