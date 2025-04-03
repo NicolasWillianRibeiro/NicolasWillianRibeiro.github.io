@@ -8,6 +8,8 @@ links:
     url: "https://NicolasWillianRibeiro.github.io"
   - label: Email
     url: "nickwillian@gmail.com"
+  - label: Relatório
+    url: "./relatorio/index.html"
 output:
   postcards::jolla
 ---
