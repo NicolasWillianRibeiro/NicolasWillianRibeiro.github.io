@@ -12,4 +12,4 @@ output:
   postcards::jolla
 ---
  
-Tenho 25 anos,sou um analista de suporte na ASI Soluções tecnologicas e um graduando em Engenharia de Telecomunicações na UFSJ.
+Tenho 25 anos, sou um analista de suporte na ASI Soluções tecnologicas e um graduando em Engenharia de Telecomunicações na UFSJ.
