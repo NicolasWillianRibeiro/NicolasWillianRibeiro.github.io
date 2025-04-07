@@ -1,0 +1,112 @@
+---
+title: "Relatório 02"
+author: "Ben Dêivide"
+date: "12/04/2022"
+header-includes:
+  - \usepackage{titling}
+  - \pretitle{\begin{center}
+    \includegraphics[width=2in,height=2in]{ufsj.png}\LARGE\\}
+  - \posttitle{\end{center}}
+toc-title: "Sumário"
+output:
+  
+  html_document:
+    theme: journal
+    highlight: tango
+    toc: yes
+    number_sections: yes
+    includes:
+      in_header: logo.html
+  pdf_document:
+    
+    toc: yes
+    number_sections: yes
+---
+
+--- 
+
+# Objetivo
+
+Esse relatorio tem como objetico apresentar um problema fictício na area de telecomunicações e sua representação por meio de analise estatistica, lembro que o problema é puramente fictício e foi gerado com o auxilio da IA DeepSeek.
+
+# Apresentação do relatório
+
+ANÁLISE DE COBERTURA 5G - OURO BRANCO (MG)
+
+Após reclamações dos moradores da cidade de Ouro Branco-MG a operadora de telefonia celular Liga+Brasil contratou um engenheiro de telecomunições para verificar possiveis problemas com a intensidade do sinal na cidade, o engenheiro realizou algumas medições e após colocar os resultados no Rstudio obeteve as seguintes informações:
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+```
+```{r}
+# Instale o pacote 'modeest' se ainda não tiver
+if(!require(modeest)) install.packages("modeest")
+library(modeest)
+library(knitr)
+
+```
+```{r}
+# Dados coletados
+ponto <- 1:20
+sinal_5g <- c(-65, -70, -68, -72, -74, -80, -77, -69, -75, -73,
+              -71, -78, -82, -76, -79, -67, -66, -83, -81, -70)
+
+# Criando tabela
+tabela_sinal <- data.frame(
+  `Ponto de Coleta` = ponto,
+  `Intensidade (dBm)` = sinal_5g
+)
+
+# Exibindo tabela
+kable(tabela_sinal, caption = "Tabela 1: Intensidade de Sinal 5G Coletada em Ouro Branco - MG")
+
+```
+
+```{r}
+# Estatísticas
+media <- mean(sinal_5g)
+mediana <- median(sinal_5g)
+moda <- mlv(sinal_5g, method = "mfv")
+desvio_padrao <- sd(sinal_5g)
+variancia <- var(sinal_5g)
+minimo <- min(sinal_5g)
+maximo <- max(sinal_5g)
+amplitude <- maximo - minimo
+quartis <- quantile(sinal_5g)
+iqr <- IQR(sinal_5g)
+
+# Tabela resumo
+tabela_estatisticas <- data.frame(
+  Medida = c("Média", "Mediana", "Moda", "Desvio Padrão", "Variância",
+             "Mínimo", "Máximo", "Amplitude", "1º Quartil (Q1)", "3º Quartil (Q3)", "IQR"),
+  Valor = round(c(media, mediana, moda, desvio_padrao, variancia,
+                  minimo, maximo, amplitude, quartis[2], quartis[4], iqr), 2)
+)
+
+# Exibindo tabela
+kable(tabela_estatisticas, caption = "Tabela 2: Medidas Estatísticas da Intensidade de Sinal 5G")
+
+```
+
+```{r}
+hist(sinal_5g, breaks = 10, col = "steelblue", border = "white",
+     main = "Distribuição da Intensidade de Sinal 5G",
+     xlab = "Intensidade (dBm)", ylab = "Frequência")
+abline(v = media, col = "red", lwd = 2, lty = 2)
+legend("topright", legend = c("Média"), col = "red", lty = 2, lwd = 2)
+
+```
+
+```{r}
+boxplot(sinal_5g, horizontal = TRUE, col = "lightblue",
+        main = "Boxplot da Intensidade de Sinal 5G",
+        xlab = "Intensidade (dBm)")
+
+```
+
+# Conclusão
+
+Levando em consideração que a intesidade de sinal considerada aceitavel é de -70 dBm, o engenheiro constatou que o sinal esta em um nivel adequado, porém algumas partes da cidade estão chegando em um nivel pessimo ( -90 dBm) e um estudo mais minucioso deve ser feito nos locais com intensidades proximas a -80 dBm. Tambem foi possivel notar que nenhuma medição apontou um sinal execelente (-30 dBm) isso pode indicar que a operadora esta trabalhando em um limiar não muito agradavel para a população e seus serviços podem estar muito expostos a contratempos como efeitos climaticos, anomalias atmosfericas e até mesmo contruções civis ou a geografia local, sendo assim como parte de seu relatorio final o engenheiro solicitou uma nova investigação dessa vez mais abrangente para verificar quais pontos devem ser melhorados para resguardar os serviços da Liga+Brasil e melhorar a cobertura da população.
+
+# Codigos e Prompt usados
+
