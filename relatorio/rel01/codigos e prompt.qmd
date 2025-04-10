@@ -1,0 +1,35 @@
+---
+title: "Codigos e Prompt"
+author: "Nicolas Willian Ribeiro"
+format: pdf
+editor: visual
+---
+
+## Codigos Utilizados no Rstudio
+
+Os codigos abaixo foram gerados pela Ia ChatGPT e foram editados para que não serem apresetados diretamente na pagina do relatorio.\
+\
+(#){r setup, include=FALSE}\
+knitr::opts_chunk\$set(echo = FALSE)
+
+(#)Instale o pacote 'modeest' se ainda não tiver\
+if(!require(modeest)) install.packages("modeest")\
+library(modeest) library(knitr)
+
+(#)Dados coletados ponto \<- 1:20 sinal_5g \<- c(-65, -70, -68, -72, -74, -80, -77, -69, -75, -73, -71, -78, -82, -76, -79, -67, -66, -83, -81, -70)
+
+(#)Criando tabela tabela_sinal \<- data.frame( `Ponto de Coleta` = ponto, `Intensidade (dBm)` = sinal_5g )
+
+(#)Exibindo tabela kable(tabela_sinal, caption = "Tabela 1: Intensidade de Sinal 5G Coletada em Ouro Branco - MG")
+
+(#)Estatísticas media \<- mean(sinal_5g) mediana \<- median(sinal_5g) moda \<- mlv(sinal_5g, method = "mfv") desvio_padrao \<- sd(sinal_5g) variancia \<- var(sinal_5g) minimo \<- min(sinal_5g) maximo \<- max(sinal_5g) amplitude \<- maximo - minimo quartis \<- quantile(sinal_5g) iqr \<- IQR(sinal_5g)
+
+(1) Tabela resumo tabela_estatisticas \<- data.frame( Medida = c("Média", "Mediana", "Moda", "Desvio Padrão", "Variância", "Mínimo", "Máximo", "Amplitude", "1º Quartil (Q1)", "3º Quartil (Q3)", "IQR"), Valor = round(c(media, mediana, moda, desvio_padrao, variancia, minimo, maximo, amplitude, quartis\[2\], quartis\[4\], iqr), 2) )
+
+(#)Exibindo tabela kable(tabela_estatisticas, caption = "Tabela 2: Medidas Estatísticas da Intensidade de Sinal 5G")
+
+hist(sinal_5g, breaks = 10, col = "steelblue", border = "white", main = "Distribuição da Intensidade de Sinal 5G", xlab = "Intensidade (dBm)", ylab = "Frequência") abline(v = media, col = "red", lwd = 2, lty = 2) legend("topright", legend = c("Média"), col = "red", lty = 2, lwd = 2)
+
+boxplot(sinal_5g, horizontal = TRUE, col = "lightblue", main = "Boxplot da Intensidade de Sinal 5G", xlab = "Intensidade (dBm)")
+
+## 

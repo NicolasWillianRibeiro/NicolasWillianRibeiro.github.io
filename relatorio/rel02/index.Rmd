@@ -1,0 +1,75 @@
+---
+title: "Relatório 02"
+author: "Nicolas Willian Ribeiro"
+date: "10/04/2025"
+header-includes:
+  - \usepackage{titling}
+  - \pretitle{\begin{center}
+    \includegraphics[width=2in,height=2in]{ufsj.png}\LARGE\\}
+  - \posttitle{\end{center}}
+toc-title: "Sumário"
+output:
+  
+  html_document:
+    theme: journal
+    highlight: tango
+    toc: yes
+    number_sections: yes
+    includes:
+      in_header: logo.html
+  pdf_document:
+    
+    toc: yes
+    number_sections: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+--- 
+
+# Objetivo
+
+Esse relatorio tem como objetivo apresentar5 a utilização da distribuição amostral na analise de variância na área de telecomonicações, utilizaremos o mesmo cenario do relatorio 01.
+
+# Apresentação do relatório
+
+Buscando analisar se os problemas de intencidade de sinal eram gerais ou apenas problemas pontuais, vamos ter agora amostras coletadas em 3 bairos diferentes para ver se tais grups nos dão uma media proxima o suficiente para dizermos que o problema é geral e não apenas em pontos especificos, com isso poderemos dizer que os serviços da Liga+Brasil em Ouro Branco-MG estão no limite entre o minimo aceitavel e o ruim.
+
+```{r}
+set.seed(123)
+
+# Gerando dados simulados para os três bairros
+inconfidentes <- rnorm(10, mean = -74, sd = 2)
+primeiro_maio <- rnorm(10, mean = -75, sd = 2)
+centro <- rnorm(10, mean = -74.5, sd = 2)
+
+# Juntando tudo em um data frame
+intensidade <- c(inconfidentes, primeiro_maio, centro)
+bairro <- rep(c("Inconfidentes", "Primeiro de Maio", "Centro"), each = 10)
+dados_bairros <- data.frame(Bairro = bairro, Intensidade = intensidade)
+
+# Visualizando a tabela
+knitr::kable(dados_bairros, caption = "Tabela: Intensidade de Sinal 5G por Bairro")
+
+```
+```{r}
+# ANOVA
+modelo_bairros <- aov(Intensidade ~ Bairro, data = dados_bairros)
+summary(modelo_bairros)
+
+```
+```{r}
+boxplot(Intensidade ~ Bairro, data = dados_bairros, col = c("lightblue", "lightgreen", "lightcoral"),
+        main = "Comparação da Intensidade de Sinal 5G por Bairro",
+        ylab = "Intensidade (dBm)", xlab = "Bairro")
+
+```
+
+# Conclusão
+
+Podemos ver que o nivel de significância obtido foi de 0.247, utilizando o teste F com valor de significancia de 0.05, concluimos que a menos que um erro do tipo B tenha ocorrido temos uma causa em comum para que as intencidades de sinal obtidas tenham sido essas.
+
+# Codigos e Prompt
+
+Ainda não consegui anexar um arquivo com todos os codigos para que fique de forma mais apresentavel, tentei usar o Quarto mas ainda me falta conhecimento.
