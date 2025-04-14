@@ -1,0 +1,80 @@
+---
+title: "Relatório 03"
+author: "Nicolas Willian Ribeiro"
+date: "17/04/2025"
+header-includes:
+  - \usepackage{titling}
+  - \pretitle{\begin{center}
+    \includegraphics[width=2in,height=2in]{ufsj.png}\LARGE\\}
+  - \posttitle{\end{center}}
+toc-title: "Sumário"
+output:
+  
+  html_document:
+    theme: journal
+    highlight: tango
+    toc: yes
+    number_sections: yes
+    includes:
+      in_header: logo.html
+  pdf_document:
+    
+    toc: yes
+    number_sections: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+--- 
+
+# Objetivo
+
+Descrever o objetivo do relatório!
+
+# Apresentação do relatório
+
+Aqui será o local para apresentar o material sobre o relatório.
+
+```{r}
+# Inicialização
+res <- numeric(10000)
+mov <- 90
+ntestes <- 10000
+
+# Simulação
+for (i in 1:ntestes) {
+  # Gerando uma amostra normal com média 90 e desvio padrão 4
+  amostra <- rnorm(n = 30, mean = 90, sd = 4)
+  
+  # Média amostral
+  xbar <- mean(amostra)
+  
+  # Estatística do teste Z
+  z <- (xbar - mov) / (4 / sqrt(30))
+  
+  # Valor crítico para 5% (note que ele pega só 2,75% porem iremos usar valores absolutos, logo a parte negativa vai ser rebatida para um valor positivo)
+  ztab <- pnorm(0.975,90,4)  
+
+  
+  # Teste de hipótese: se valor absoluto do z for maior que o crítico, rejeita H0
+  res[i] <- if (abs(z) >= abs(ztab)) 1 else 0
+}
+
+# Estimativa empírica de alpha (erro tipo I)
+alphaemp <- sum(res) / ntestes
+
+# Mostrando os primeiros 10 resultados em uma tabela
+tabela_resultados <- data.frame(
+  Simulacao = 1:10,
+  Rejeitou_H0 = res[1:10]
+)
+
+# Exibindo
+print(tabela_resultados)
+
+# Mostrando o valor final de alpha empírico
+cat("Alpha empírico estimado:", alphaemp, "\n")
+
+```
+
