@@ -34,47 +34,66 @@ Descrever o objetivo do relatório!
 
 # Apresentação do relatório
 
-Aqui será o local para apresentar o material sobre o relatório.
+Neste relatório, sairemos dos problemas de análise de intensidade de sinal e faremos um estudo sobre a taxa de erros do tipo 1 do teste F para determinados níveis de significância (1%, 5% e 10%) e também analisaremos o poder desse teste para esses mesmos níveis de significância.
+
+O teste de erro consiste em escolhermos uma média populacional, no caso 90, e gerar uma função normal com 30 amostras e um desvio padrão de 4. Vamos realizar o teste dez mil vezes e verificar a taxa de erros. Iremos saber a taxa de erro pois fomos nós quem escolhemos a média populacional, e atribuímos o mesmo valor à média amostral, logo sempre que o teste de hipótese rejeitar que a média amostral é igual à média populacional temos um erro do tipo 1.
+
+Já no teste de poder, vamos mudar o valor da média populacional para um valor levemente diferente da média amostral. Nesse caso, nossa intenção é que o teste rejeite que a média populacional é igual à média amostral. Sempre que ele aceitar essa igualdade, ele cometerá um erro do tipo 2 (o poder é o complemento do erro do tipo 2: Poder = 1 - erro do tipo 2).
 
 ```{r}
-# Inicialização
-res <- numeric(10000)
-mov <- 90
-ntestes <- 10000
+#Criando uma função para calcular o alpha empririco 
+calcular_alpha_empirico <- function(alpha, ntestes = 10000, n = 30, mu = 90, sd = 4) {
+  ztab <- qnorm(1 - alpha/2)
+  res <- numeric(ntestes)
 
-# Simulação
-for (i in 1:ntestes) {
-  # Gerando uma amostra normal com média 90 e desvio padrão 4
-  amostra <- rnorm(n = 30, mean = 90, sd = 4)
-  
-  # Média amostral
-  xbar <- mean(amostra)
-  
-  # Estatística do teste Z
-  z <- (xbar - mov) / (4 / sqrt(30))
-  
-  # Valor crítico para 5% (note que ele pega só 2,75% porem iremos usar valores absolutos, logo a parte negativa vai ser rebatida para um valor positivo)
-  ztab <- pnorm(0.975,90,4)  
+  for (i in 1:ntestes) {
+    amostra <- rnorm(n, mean = mu, sd = sd)
+    xbar <- mean(amostra)
+    z <- (xbar - mu) / (sd / sqrt(n))
+    res[i] <- if (abs(z) >= ztab) 1 else 0
+  }
 
+  return(mean(res))  
+}
+# Criando uma função para calcular o Poder
+calcular_poder <- function(alpha, mu_verdadeiro = 92, mu_hipotese = 90, ntestes = 10000, n = 30, sd = 4) {
+  ztab <- qnorm(1 - alpha/2)
+  res <- numeric(ntestes)
   
-  # Teste de hipótese: se valor absoluto do z for maior que o crítico, rejeita H0
-  res[i] <- if (abs(z) >= abs(ztab)) 1 else 0
+  for (i in 1:ntestes) {
+    amostra <- rnorm(n, mean = mu_verdadeiro, sd = sd)
+    xbar <- mean(amostra)
+    z <- (xbar - mu_hipotese) / (sd / sqrt(n))
+    res[i] <- if (abs(z) >= ztab) 1 else 0
+  }
+
+  return(mean(res)) 
 }
 
-# Estimativa empírica de alpha (erro tipo I)
-alphaemp <- sum(res) / ntestes
+#Note que o codigo não da erro, mesmo sem eu informar os valores de alpha, pois se trata de funções, e o codigo só vai realizar as funções quando elas forem chamadas.
 
-# Mostrando os primeiros 10 resultados em uma tabela
-tabela_resultados <- data.frame(
-  Simulacao = 1:10,
-  Rejeitou_H0 = res[1:10]
+# Alfas teóricos que queremos testar
+alphas <- c(0.01, 0.05, 0.10)
+
+# Chamando as funções para calcular os alphas empiricos e o poder para cada nivel de significancia
+resultados <- data.frame(
+  Alpha_Teorico = alphas,
+  Alpha_Empirico = sapply(alphas, calcular_alpha_empirico),
+  Poder = sapply(alphas, calcular_poder)
 )
 
-# Exibindo
-print(tabela_resultados)
+# Mostrar a tabela formatada
+print(resultados)
 
-# Mostrando o valor final de alpha empírico
-cat("Alpha empírico estimado:", alphaemp, "\n")
 
 ```
 
+# Conclusão
+
+Podemos notar que nosso alpha empírico está aceitável quando comparado ao nível de significância, com uma leve exceção ao caso 2 no qual o alpha empírico está maior que o nível de significância. Já o poder nos traz uma visualização sobre a relação entre o nível de significância e existência do erro do tipo 2, de forma que, enquanto menor o nível de significância, menor o poder, logo mais vezes uma hipótese falsa foi aceita, no caso de um nível de significância maior, o poder aumenta.
+
+Uma possível conclusão seria que níveis de significância maiores são melhores, porém se analisarmos que o erro do tipo 1 é rejeitar uma hipótese verdadeira, aumentar o nível de significância aumenta a quantidade de vezes que esse erro acontece, o alpha empírico demonstra exatamente isso.
+
+# Codigos e Prompts
+
+Dessa vez, irei deixar os códigos amostra, pois esse tema é um pouco mais complicado e futuros alunos com facilidade em programação podem conseguir entender melhor o tema analisando o código, e alunos com dificuldade em programar podem ler os comentários do mesmo para entender o que cada parte do código está fazendo e, caso o copiem, irão saber exatamente o que está acontecendo em suas análises.
