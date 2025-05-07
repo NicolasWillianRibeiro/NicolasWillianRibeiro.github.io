@@ -167,4 +167,5 @@ Relatórios desenvolvidos:
 - [Relatório 01 (03/04/2025)](rel01/index.html){target="_blank"}
 - [Relatório 02 (10/04/2025)](rel02/index.html){target="_blank"}
 - [Relatório 03 (14/04/2025)](rel03/index.html){target="_blank"}
+- [Relatório 04 (07/05/2025)](rel04/index.html){target="_blank"}
 - ...
