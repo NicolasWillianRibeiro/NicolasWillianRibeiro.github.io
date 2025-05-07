@@ -1,0 +1,157 @@
+---
+title: "Relatório 04"
+author: "Nicolas Willian Ribeiro"
+date: "07/05/2025"
+header-includes:
+  - \usepackage{titling}
+  - \pretitle{\begin{center}
+    \includegraphics[width=2in,height=2in]{ufsj.png}\LARGE\\}
+  - \posttitle{\end{center}}
+toc-title: "Sumário"
+output:
+  
+  html_document:
+    theme: journal
+    highlight: tango
+    toc: yes
+    number_sections: yes
+    includes:
+      in_header: logo.html
+  pdf_document:
+    
+    toc: yes
+    number_sections: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+--- 
+
+# Objetivo
+
+Avaliar o desempenho de 4 tipos de antenas para transmissão Wi-Fi em ambientes internos, considerando a intensidade média do sinal recebido em diferentes pontos fixos.
+
+# Apresentação do relatório
+
+Utilizando o modelo DIC iremos verificar quatro modelos de antenas diferentes para verificar se existe uma diferença significativa entre elas, e caso exista, qual delas se sai melhor no cenario na qual o teste esta sendo aplicado.
+
+Abaixo estão as bibliotecas utilizadas no R studio.
+
+```{r}
+ #Manipulação de dados (pipes, group_by, summarise etc.)
+library(dplyr)
+
+# Gráficos bonitos, como boxplot
+library(ggplot2)
+
+# Teste de Tukey com agrupamento de médias
+library(agricolae)
+```
+Começamos a analise com a colheta de dados, no estudo em questão os a intencidade de sinal.
+```{r}
+# Banco de Dados
+dados <- read.table(header = TRUE, text = "
+antena sinal
+Dipolo -49.121
+Dipolo -48.460
+Dipolo -44.883
+Dipolo -47.859
+Dipolo -47.741
+Direcional -39.427
+Direcional -41.309
+Direcional -43.898
+Direcional -43.030
+Direcional -42.668
+Omnidirecional -43.797
+Omnidirecional -45.352
+Omnidirecional -45.279
+Omnidirecional -45.801
+Omnidirecional -47.001
+Patch -41.856
+Patch -43.403
+Patch -46.360
+Patch -43.158
+Patch -44.567
+")
+
+dados$antena <- as.factor(dados$antena)
+
+```
+Inicio da analise dos dados:
+```{r}
+
+# Analise Descritiva:
+
+# Coeficiente de variação função
+cv <- function(x) sd(x) / mean(x) * 100
+
+# Geral
+media_geral <- mean(dados$sinal)
+desvio_geral <- sd(dados$sinal)
+cv_geral <- cv(dados$sinal)
+
+cat("Média Geral:", media_geral, "\n")
+cat("Desvio Padrão Geral:", desvio_geral, "\n")
+cat("CV Geral (%):", cv_geral, "\n")
+
+# Por tratamento
+resumo <- dados %>%
+  group_by(antena) %>%
+  summarise(
+    Media = mean(sinal),
+    Desvio = sd(sinal),
+    CV = cv(sinal) * -1
+  )
+
+print(resumo)
+
+```
+
+```{r}
+ggplot(dados, aes(x = antena, y = sinal, fill = antena)) +
+  geom_boxplot() +
+  theme_minimal() +
+  labs(title = "Boxplot da Intensidade do Sinal por Tipo de Antena",
+       x = "Tipo de Antena", y = "Intensidade (dBm)") +
+  theme(legend.position = "none")
+
+```
+
+```{r}
+# Analise ANOVA
+
+modelo <- aov(sinal ~ antena, data = dados)
+summary(modelo)
+
+```
+
+```{r}
+# Teste de Comparações Múltiplas
+
+tukey <- HSD.test(modelo, "antena", group = TRUE)
+print(tukey)
+
+```
+
+```{r}
+# Análise de Resíduos
+
+par(mfrow = c(2,2))
+plot(modelo)
+
+```
+
+# Conclusão
+
+Nossa analise descritiva nos trouxe que cada modelo de antena possui um nivel aceitavel de variação de sinal, ou seja, tudo indica que não possui uma fonte variabilidade que esteja tornando os dados heterogenios e podemos seguir com o metedo DIC.
+
+O Boxplot já traz com ele que um determinado modelo de antena possui um nivel de sinal melhor, menos negativo, porém podemos ver que esse modelo possui uma maior variação de nivel de sinal. Olhando novamente a analise descritiva já era de se esperar algo assim pois o coeficiente de variação do modelo com o a media menos negativa era o maior, isso não significa que sempre o melhor nivel vai ter alta variabilidade apenas explica o que o grafico nos mostra.
+
+A ANOVA já rejeita a hipótese de que todas as antenas são estatisticamente iguais, mesmo não indicando qual deles é a melhor a analise nos diz que há diferença entre dois modelos de antenas pelo menos.
+
+O teste de comparações multiplas (Tukey) classifica os modelos com base no seu desempenho e na igualdade estatistica entre eles, é aqui aonde vemos quais modelos são estatisticamente iguais e qual deles se saiu melhor que os demais, notamos que existe uma igualdade entre dos modelos Direcionais/Patch, Patch/Omnidirecional e Omninidirecional/Dipolo, porem isso não seguinifica que todas são estatisticamente iguais, podemos dizer que os modelos Patch e Omnidirecional não possuem diferenças muito claras entre elas e com os modelos nas extremidades, porem o modelo Direcional possui o melhor nivel de intensidade de sinale apenas o modelo Patch apresenta niveis proximos, por maios que o modelo Omnidirecional possua niveis proximos do modelo Patch seus niveis não são suficientes para a proximidade com o modelo Direcional.
+
+# Comentario
+
+Ao estudar antenas nos aprendemos a diferença entre as antenas e suas caracteristicas, os resultados aprensentados atendem as expectativas iniciais afinal uma antena direcional concentra o sinal em uma detarminada area ja o Dipolo, apesar de ser equivalente a uma antena Omnidirecional dupla, espalhar mais o sinal. É importante dizer que o desempenho das antenas pode mudar draticamente de acordo com o local aonde elas foram colocadas e o local da colheta de dados, ou seja o Dipolo pode sim se sair melhor que o Direcional dependendo de como forem instalados.
