@@ -1,0 +1,174 @@
+---
+title: "Relatório 05"
+author: "Nicolas Willian Ribeiro"
+date: "12/05/2025"
+header-includes:
+  - \usepackage{titling}
+  - \pretitle{\begin{center}
+    \includegraphics[width=2in,height=2in]{ufsj.png}\LARGE\\}
+  - \posttitle{\end{center}}
+toc-title: "Sumário"
+output:
+  
+  html_document:
+    theme: journal
+    highlight: tango
+    toc: yes
+    number_sections: yes
+    includes:
+      in_header: logo.html
+  pdf_document:
+    
+    toc: yes
+    number_sections: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+--- 
+
+# Objetivo
+
+Selecionar o melhor modelo de modulação para um provedor de serviços de telecomunicações, levando em conta os diferentes bairros que o provedor atende.
+
+# Apresentação do relatório
+
+O relatorio tem como objetivo mostrar os resultados de uma analise  de Variância usando DBC para saber qual tipo de modulação se encaixa melhor no cenario e se a blocagem por bairros realmente influencía na analise.
+
+Lista de bibliotecas utilizadas
+
+```{r}
+# Manipulação e visualização de dados
+library(tidyverse)    # Inclui dplyr, ggplot2, etc.
+
+# Análise de experimentos e comparações múltiplas
+library(agricolae)    # Para análise DBC, teste de Tukey, etc.
+
+# (opcional) Para tabelas mais bonitas em relatórios
+library(knitr)        # kable
+library(kableExtra)   # Tabelas HTML personalizadas
+
+```
+Dados:
+```{r}
+# Inserindo os dados manualmente
+dados <- data.frame(
+  Bairro = factor(rep(1:5, each = 4)),
+  Modulacao = factor(rep(c("QPSK", "16QAM", "64QAM", "OFDM"), times = 5)),
+  BER = c(
+    0.08, 0.11, 0.14, 0.07,  # Bairro 1
+    0.09, 0.12, 0.15, 0.06,  # Bairro 2
+    0.07, 0.10, 0.13, 0.08,  # Bairro 3
+    0.10, 0.13, 0.16, 0.09,  # Bairro 4
+    0.09, 0.12, 0.14, 0.07   # Bairro 5
+  )
+)
+
+# Visualizar os dados
+print(dados)
+
+```
+
+
+Analise descritiva:
+```{r}
+# Analise descritiva:
+
+# Geral
+media_geral <- mean(dados$BER)
+dp_geral <- sd(dados$BER)
+cv_geral <- (dp_geral / media_geral) * 100
+
+cat("Média geral:", media_geral, "\n")
+cat("Desvio padrão geral:", dp_geral, "\n")
+cat("Coeficiente de variação (%):", cv_geral, "\n")
+
+
+# por modulação
+dados %>%
+  group_by(Modulacao) %>%
+  summarise(
+    Media = mean(BER),
+    DP = sd(BER),
+    CV = (DP / Media) * 100
+  )
+
+```
+Grafico Boxplot:
+```{r}
+ggplot(dados, aes(x = Modulacao, y = BER, fill = Modulacao)) +
+  geom_boxplot() +
+  theme_minimal() +
+  labs(title = "Distribuição do BER por Modulação",
+       y = "Taxa de Erro de Bit (BER)", x = "Técnica de Modulação")
+
+```
+Analise de Variância utilizando DBC:
+```{r}
+modelo <- aov(BER ~ Modulacao + Bairro, data = dados)
+summary(modelo)
+
+```
+Analise de Residuos:
+```{r}
+par(mfrow = c(2,2))
+plot(modelo)
+
+```
+Comparações Múltiplas (Tukey):
+```{r}
+# Teste de Tukey
+tukey <- HSD.test(modelo, "Modulacao", group = TRUE)
+print(tukey)
+
+```
+
+#Conclusão
+
+Analisando o Boxplot já conseguimos ver duas modulações com alto indice de BER (Bit Error Rate) podemos então pressupor que existe diferença entre as modulações e que talvez a analise por blocos tenha surtido efeito e a analise de residuos nos mostra que tudo esta conforme o esperado, as amostras ficaram homogeneas.
+
+Quando a melhor modulação temos duas modulações estatisticamente equivalentes QPSK e OFDM, sendo a OFDM a menor BER, nesse caso como elas são estatisticamente equivalentes pode se considerar o menor custo de implatação na hora de escolher qual delas utilizar.
+
+#Curiosidade
+
+Por curiosidade eu retirei a blocagem dessa analise para compararmos os resultados.
+```{r}
+# Carregando bibliotecas
+library(tidyverse)
+library(agricolae)
+
+# Dados (mesmos de antes)
+dados <- data.frame(
+  Bairro = factor(rep(1:5, each = 4)),
+  Modulacao = factor(rep(c("QPSK", "16QAM", "64QAM", "OFDM"), times = 5)),
+  BER = c(
+    0.08, 0.11, 0.14, 0.07,
+    0.09, 0.12, 0.15, 0.06,
+    0.07, 0.10, 0.13, 0.08,
+    0.10, 0.13, 0.16, 0.09,
+    0.09, 0.12, 0.14, 0.07
+  )
+)
+
+# 🎯 MODELO DIC: Apenas o efeito da modulação
+modelo_dic <- aov(BER ~ Modulacao, data = dados)
+
+# Resumo da ANOVA
+summary(modelo_dic)
+
+ggplot(dados, aes(x = Modulacao, y = BER, fill = Modulacao)) +
+  geom_boxplot() +
+  theme_minimal() +
+  labs(title = "BER por Modulação - DIC",
+       x = "Modulação", y = "Taxa de Erro de Bit (BER)")
+
+# Comparação múltipla
+tukey_dic <- HSD.test(modelo_dic, "Modulacao", group = TRUE)
+print(tukey_dic)
+
+```
+
+#Comentarios
+
+Ao realizar a analise DIC e DBC verificamos que os blocos não surtiram efeito, ou seja eles não afetavam a variável resposta, ou os dados já eram homogeneos mesmo antes da blocagem. Concluo que nesse caso especifico não faria diferença a analise DIC ou DBC.
